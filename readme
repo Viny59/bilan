@@ -1,0 +1,9 @@
+#Etape 1
+
+Installation de docker avec le script suivant nommé install_docker.sh
+
+#Etape 2
+Ensuite créer un dossier pour utiliser docker compose avec le fichier docker-compose.yml
+Une fois dans le répertoire du fichier faire docker 
+network create service-network
+docker-compose up -d
