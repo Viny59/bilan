@@ -1,82 +1,68 @@
-version: '3.8'
-
 services:
-  # Service MySQL pour WordPress
-  wordpress-db:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: wordpress_root_password
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress_password
-    volumes:
-      - wordpress_db_data:/var/lib/mysql
-    networks:
-      - service-network
-
-  # Service WordPress
   wordpress:
     image: wordpress:latest
     container_name: wordpress
     ports:
-      - "8080:80"  # Accès à WordPress sur http://localhost:8080
+      - "8080:80"
     environment:
-      WORDPRESS_DB_HOST: wordpress-db:3306
+      WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress_data:/var/www/html
-    networks:
-      - service-network
 
-  # Service MySQL pour Zabbix
-  zabbix-db:
-    image: mysql:latest
+  db:
+    image: mariadb:latest
+    container_name: wordpress_db
     environment:
-      MYSQL_ROOT_PASSWORD: zabbix_root_password
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:latest
+    container_name: zabbix_server
+    ports:
+      - "10051:10051"
+    environment:
+      DB_SERVER_HOST: zabbix_db
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_password
+      MYSQL_DATABASE: zabbix
+    depends_on:
+      - zabbix_db
+
+  zabbix_db:
+    image: mariadb:latest
+    container_name: zabbix_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
       MYSQL_PASSWORD: zabbix_password
     volumes:
       - zabbix_db_data:/var/lib/mysql
-    networks:
-      - service-network
 
-  # Service Zabbix Server
-  zabbix-server:
-    image: zabbix/zabbix-server-mysql:latest
-    environment:
-      DB_SERVER_HOST: zabbix-db
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix_password
-    depends_on:
-      - zabbix-db
-    networks:
-      - service-network
-
-  # Service Web pour Zabbix (Nginx + Zabbix Web UI)
   zabbix-web:
     image: zabbix/zabbix-web-nginx-mysql:latest
+    container_name: zabbix_web
+    ports:
+      - "8081:8080"
     environment:
-      DB_SERVER_HOST: zabbix-db
-      MYSQL_DATABASE: zabbix
+      ZBX_SERVER_HOST: zabbix_server
+      DB_SERVER_HOST: zabbix_db
       MYSQL_USER: zabbix
       MYSQL_PASSWORD: zabbix_password
-      ZBX_SERVER_HOST: zabbix-server
-    ports:
-      - "8081:8080"  # Accès à l'interface Zabbix sur http://localhost:8081
+      MYSQL_DATABASE: zabbix
     depends_on:
       - zabbix-server
-    networks:
-      - service-network
 
 volumes:
-  wordpress_db_data:
   wordpress_data:
+  db_data:
   zabbix_db_data:
 
-networks:
-  service-network:
-    external: true
