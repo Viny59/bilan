@@ -1,7 +1,9 @@
+#!/bin/bash
+
 # Étape 1 : Préparer le dépôt APT de Docker
 echo "Mise à jour et installation des dépendances de Docker..."
 apt-get update -y
-apt-get install -y ca-certificates curl
+apt-get install -y ca-certificates curl gnupg
 
 # Configuration des permissions et téléchargement de la clé GPG Docker
 install -m 0755 -d /etc/apt/keyrings
@@ -23,15 +25,10 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 
 # Vérifier que Docker est installé
 echo "Vérification de l'installation de Docker..."
-docker --versionc
+docker --version
 
 # Étape 4 : Exécuter un test avec Docker
 echo "Exécution du test Docker hello-world..."
 docker run hello-world
 
-
 echo "Installation terminée !"
-
-mkdir -p ~/docker-services
-
-sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
