@@ -29,14 +29,9 @@ docker --versionc
 echo "Exécution du test Docker hello-world..."
 docker run hello-world
 
-# Étape 5 : (Optionnel) Lancer des conteneurs nginx et Apache pour vérification
-echo "Lancement des conteneurs Nginx et Apache..."
-docker run -p 8080:80 -d nginx
-docker run -p 8081:80 -d httpd
 
-echo "Installation terminée ! Accédez à Nginx sur http://votre_ip:8080 et à Apache sur http://votre_ip:8081"
+echo "Installation terminée !"
 
 mkdir -p ~/docker-services
-nano docker-compose.yml
 
 sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
